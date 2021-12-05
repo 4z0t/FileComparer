@@ -13,7 +13,7 @@ int main()
 	
 	FileComparer fc;
 	//fc.start("C:\\Users\\4z0t\\Documents\\lab6test");
-	fc.start("E:\\Program Files (x86)");
+	fc.start("E:\\Program Files (x86)","results.txt");
 	/*try {
 
 	}

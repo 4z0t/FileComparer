@@ -39,11 +39,11 @@ public:
 
 
 	}
-	void start(const fspath& path)
+	void start(const fspath& check_path, const fspath& dump_path)
 	{
-		std::thread go_through_dirs_thread(&FileComparer::go_through_dirs, this, std::ref(path));
+		std::thread go_through_dirs_thread(&FileComparer::go_through_dirs, this, std::ref(check_path));
 		std::thread distributor_thread(&FileComparer::distributor, this);
-		std::thread dumper_thread(&FileComparer::dumper, this);
+		std::thread dumper_thread(&FileComparer::dumper, this, std::ref(dump_path));
 		go_through_dirs_thread.join();
 		distributor_thread.join();
 		dumper_thread.join();
@@ -93,9 +93,9 @@ private:
 	}
 
 
-	void dumper()
+	void dumper(const fspath& path)
 	{
-		std::ofstream file("result2.txt", std::ios::ate);
+		std::ofstream file(path, std::ios::ate);
 		if (!file.is_open()) throw std::exception("cant open file for dump!");
 		while (true)
 		{
@@ -119,6 +119,7 @@ private:
 				}
 			}
 		}
+		file << "Files scaned: " << this->files.size() << std::endl;
 		file.close();
 	}
 
@@ -139,7 +140,7 @@ private:
 	void distributor()
 	{
 		//std::vector <std::shared_ptr<fs_directory_entry_ptr_pair>> file_pairs;
-		int last_end = this->files.size();
+		std::size_t last_end = this->files.size();
 
 		while (!this->is_done)
 		{
