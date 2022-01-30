@@ -11,14 +11,6 @@ void file_compare()
 	FileComparer fc;
 	//fc.start("C:\\Users\\4z0t\\Documents\\lab6test","results.txt");
 	fc.start("E:\\Program Files (x86)", "results.txt");
-	/*try {
-
-	}
-	catch (std::exception ex)
-	{
-		std::cout << ex.what() << std::endl;
-	}*/
-	//std::cin.get();
 
 }
 
