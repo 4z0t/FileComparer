@@ -40,11 +40,4 @@ int main()
 {
 	setlocale(LC_CTYPE, "Rus");
 	file_compare();
-	//int n = 8;
-	//cout << n % 11 + 1 << endl;//9
-	//cout << ((n * n * n) % 11 + 3) % 11 + 1 << endl;//10
-	
-	
-
-
 }
