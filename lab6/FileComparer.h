@@ -19,6 +19,8 @@ class FileComparer
 	typedef std::shared_ptr<fs_directory_entry> fs_directory_entry_ptr;
 	typedef std::pair< fs_directory_entry_ptr, fs_directory_entry_ptr> fs_directory_entry_ptr_pair;
 
+	std::chrono::time_point<std::chrono::system_clock> start_time;
+
 	std::vector<
 		std::unique_ptr<
 		std::pair<
@@ -41,6 +43,7 @@ public:
 	}
 	void start(const fspath& check_path, const fspath& dump_path)
 	{
+		this->start_time = std::chrono::system_clock::now();
 		std::thread go_through_dirs_thread(&FileComparer::go_through_dirs, this, std::ref(check_path));
 		std::thread distributor_thread(&FileComparer::distributor, this);
 		std::thread dumper_thread(&FileComparer::dumper, this, std::ref(dump_path));
@@ -61,10 +64,11 @@ public:
 private:
 	inline static bool shallow_compare(const fs_directory_entry& de1, const fs_directory_entry& de2)
 	{
-		return de1.file_size() == de2.file_size();	
+		return de1.file_size() == de2.file_size();
 	}
 	//TODO:
 	// use hashing  instead
+	//md5
 	static bool deep_compare(const fs_directory_entry& de1, const fs_directory_entry& de2)
 	{
 		std::ifstream f1(de1.path(), std::ios::binary);
@@ -108,19 +112,30 @@ private:
 						if (resl.second.get())
 						{
 							std::lock_guard lock(this->output);
-							file << "Found equal files:\n" << '\t' << resl.first->first->path() << "\n\t" << resl.first->second->path() << std::endl;
+							file << "Found equal files:\n" << '\t'
+								<< resl.first->first->path().lexically_normal().generic_string()
+								<< "\n\t"
+								<< resl.first->second->path().lexically_normal().generic_string()
+								<< std::endl;
 						}
 						});
 					this->results.pop_back();
 				}
 				else {
-					if (this->is_done)return;
+					if (this->is_done)
+					{
+						file << "Files scaned: " << this->files.size() << std::endl;
+						file << "Elapsed time: "
+							<< std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - this->start_time).count()
+							<< " ms" << std::endl;
+						file.close();
+						return;
+					}
 					break;
 				}
 			}
 		}
-		file << "Files scaned: " << this->files.size() << std::endl;
-		file.close();
+
 	}
 
 	void go_through_dirs(const fspath& path)
@@ -153,7 +168,7 @@ private:
 					for (auto path_p2 = (this->files.begin() + last_end > path_p1) ? last_end + this->files.begin() : path_p1 + 1; path_p2 != this->files.end(); path_p2++)
 					{
 						//if (!this->is_in_pairs(file_pairs, *path_p1, *path_p2))
-						if(shallow_compare(**path_p1, **path_p2))
+						if (shallow_compare(**path_p1, **path_p2))
 						{
 							fs_directory_entry_ptr_pair files_pair;
 
@@ -185,17 +200,6 @@ private:
 
 	}
 
-	bool is_in_pairs(const std::vector <std::shared_ptr<fs_directory_entry_ptr_pair>>& file_pairs,
-		const fs_directory_entry_ptr& p1,
-		const fs_directory_entry_ptr& p2)
-	{
-		for (auto& pair : file_pairs)
-		{
-			if ((pair->first == p1 and pair->second == p2) or (pair->first == p2 and pair->second == p1))
-				return true;
-		}
-		return false;
-	}
 
 };
 

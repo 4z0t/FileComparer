@@ -154,10 +154,14 @@
     <ClCompile Include="FileComparer.cpp" />
     <ClCompile Include="FileRenamer.cpp" />
     <ClCompile Include="lab6.cpp" />
+    <ClCompile Include="Task10.cpp" />
+    <ClCompile Include="Task9.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileComparer.h" />
     <ClInclude Include="FileRenamer.h" />
+    <ClInclude Include="Task10.h" />
+    <ClInclude Include="Task9.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
